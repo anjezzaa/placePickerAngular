@@ -22,21 +22,21 @@ export class AvailablePlacesComponent implements OnInit {
 
   // constructor(private httpClient: HttpClient) {}
   ngOnInit() {
-    this.isFetching.set(true);
-    const subscription = this.httpClient
-    .get<{places: Place[] }>('http://localhost:4200/places')
+  this.isFetching.set(true);
+
+  const subscription = this.httpClient
+    .get<{ places: Place[] }>('http://localhost:3000/places')
     .pipe(
-      map((resData) => resData.places), 
+      map((resData) => resData.places),
       catchError((error) => {
         console.log(error);
-        return throwError(
-          () => 
-            new Error(
-          'Something went wrong fetching the available places. Please try again later.'
-        )
-      );
-    })
-  )
+        return throwError(() =>
+          new Error(
+            'Something went wrong fetching the available places. Please try again later.'
+          )
+        );
+      })
+    )
     .subscribe({
       next: (places) => {
         this.places.set(places);
@@ -44,13 +44,22 @@ export class AvailablePlacesComponent implements OnInit {
       error: (error: Error) => {
         this.error.set(error.message);
       },
-      complete:()=>{
+      complete: () => {
         this.isFetching.set(false);
-      }
+      },
     });
 
-    this.destroyRef.onDestroy(()=> {
-      subscription.unsubscribe();
+  this.destroyRef.onDestroy(() => {
+    subscription.unsubscribe();
+  });
+}
+
+
+  onSelectPlace(selectedPlace: Place){
+    this.httpClient.put('http://localhost:3000/user-places', {
+      placeId: selectedPlace.id
+    }).subscribe({
+      next: (resData) => console.log(resData),
     });
   }
 }
